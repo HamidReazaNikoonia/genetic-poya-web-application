@@ -1,15 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import {
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
-import { RouterProvider } from 'react-router-dom'
+import { RouterProvider } from "react-router-dom";
+import { BrowserRouter as Router } from "react-router-dom";
 
-
-import { router } from './routes'
+import { router } from "./routes";
+import { AppRoutes } from "./routes";
 import "./index.css";
 import App from "./App";
 import reportWebVitals from "./reportWebVitals";
@@ -21,8 +19,10 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-    <RouterProvider router={router} />
-    <ReactQueryDevtools initialIsOpen={false} position='bottom-right' />
+      <Router>
+        <AppRoutes />
+      </Router>
+      <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
       {/* <App /> */}
     </QueryClientProvider>
   </React.StrictMode>

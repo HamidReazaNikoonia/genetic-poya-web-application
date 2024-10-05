@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Grid,
   Paper,
@@ -6,81 +7,56 @@ import {
   TextField,
   Button,
   Box,
-  ThemeProvider,
-  createTheme,
   Snackbar,
   CssBaseline,
 } from "@mui/material";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/material.css";
 import { useMutation } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 // Query
 import { sendMobileNumber, sendOtpCode } from "../../api";
 
-import Samim from "../../fonts/Samim.woff2";
-
-const theme = createTheme({
-  typography: {
-    fontFamily: [
-      "Samim",
-      "BlinkMacSystemFont",
-      '"Segoe UI"',
-      "Roboto",
-      '"Helvetica Neue"',
-      "Arial",
-      "sans-serif",
-    ].join(","),
-  },
-  components: {
-    MuiCssBaseline: {
-      styleOverrides: `
-            @font-face {
-              font-family: 'Samim';
-              font-style: normal;
-              font-display: swap;
-              font-weight: 400;
-              src: url(${Samim}) format('woff2');
-              unicodeRange: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF;
-            }
-          `,
-    },
-  },
-});
 
 export default function Index() {
+  const navigate = useNavigate();
+
   const [phone, setPhone] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  
-  // Navigate UI 
+
+  // Navigate UI
   // Step 0 => Mobile number Form
   // Step 1 => Otp Code Form
   const [authSteps, setAuthSteps] = useState(0);
-  
+
   const [otpCode, setOtpCode] = useState("");
   const [userId, setUserId] = useState("");
 
-
- /**
-  * Mutation and form submit handler for sending mobile number with other information to the API
-  */
+  /**
+   * Mutation and form submit handler for sending mobile number with other information to the API
+   *
+   * mutation fn => Send User Mobile , ... to the API
+   * POST v1/auth/login-otp
+   *
+   * handleSubmit fn => Form submit handler
+   *
+   */
   const mutation = useMutation({
     mutationFn: sendMobileNumber,
     onSuccess: (data) => {
       console.log("API response:", data);
       if (data.data && data.status === 200) {
-        setSnackbarMessage("شماره موبایل شما به درستی ثبت شد");
-        setSnackbarOpen(true);
+        toast.success("شماره موبایل شما به درستی ثبت شد");
 
         // navigate to next step
         setAuthSteps(1);
         setUserId(data.data?.user?.id);
       } else {
-         setSnackbarMessage("Error sending mobile number. Please try again.");
-         setSnackbarOpen(true);
+        toast.error("خطایی رخ داده , لطفا دوباره امتحان کنید");
       }
     },
     onError: (error) => {
@@ -88,12 +64,11 @@ export default function Index() {
       if (error.response) {
         if (error.response.data) {
           if (error.response.data.code && error.response.data.message) {
-            setSnackbarMessage(error.response.data.message);
-            setSnackbarOpen(true);
+            toast.error(error.response.data.message);
           }
         }
       }
-      // setSnackbarMessage("Error sending mobile number. Please try again.");
+      toast.error("خطایی رخ داده , لطفا دوباره امتحان کنید");
     },
   });
 
@@ -101,14 +76,12 @@ export default function Index() {
     event.preventDefault();
 
     if (!phone || phone === " ") {
-      setSnackbarMessage("لطفا موبایل خود را وارد کنید");
-      setSnackbarOpen(true);
+      toast.error("لطفا موبایل خود را وارد کنید");
       return false;
     }
 
     if (!name || name === " ") {
-      setSnackbarMessage("لطفا نام خود را وارد کنید");
-      setSnackbarOpen(true);
+      toast.error("لطفا نام خود را وارد کنید");
       return false;
     }
 
@@ -122,36 +95,39 @@ export default function Index() {
     mutation.mutate(bodyData);
   };
 
+  /**
+   * Send Otp-Code to the API Handler and Mutation
+   *
+   * mutationForOtpCode fn => send otp code th the API
+   * POST v1/auth/validate-otp
+   *
+   * handleOtpCodeSubmit fn => Form submit handler
+   *
+   *
+   */
+  const handleOtpCodeSubmit = (e) => {
+    e.preventDefault();
 
-/**
- * Send Otp-Code to the API Handler and Mutation 
- */
-    const handleOtpCodeSubmit = (e) => {
-      e.preventDefault();
+    if (!otpCode || otpCode === " ") {
+      toast.error("لطفا کد ارسالی را وارد کنید");
+      return false;
+    }
 
-      if (!otpCode || otpCode === ' ') {
-        setSnackbarMessage("لطفا کد ارسالی را وارد کنید");
-        setSnackbarOpen(true);
-        return false;
-      }
-
-      // Trigger the mutation with the phone number
-      mutationForOtpCode.mutate({otpCode, userId});
-  }
+    // Trigger the mutation with the phone number
+    mutationForOtpCode.mutate({ otpCode, userId });
+  };
 
   const mutationForOtpCode = useMutation({
     mutationFn: sendOtpCode,
     onSuccess: (data) => {
       console.log("API response:", data);
       if (data.data && data.status === 200) {
-        setSnackbarMessage("شماره موبایل شما به درستی ثبت شد");
-        setSnackbarOpen(true);
+        toast.success("شما با موفقیت وارد شدید");
 
-        // navigate to next step
-        setAuthSteps(1);
+        // navigate to dashboard
+        navigate("/dashboard");
       } else {
-         setSnackbarMessage("Error sending OTP Code. Please try again.");
-         setSnackbarOpen(true);
+        toast.error("خطایی رخ داده , لطفا دوباره امتحان کنید");
       }
     },
     onError: (error) => {
@@ -159,12 +135,11 @@ export default function Index() {
       if (error.response) {
         if (error.response.data) {
           if (error.response.data.code && error.response.data.message) {
-            setSnackbarMessage(error.response.data.message);
-            setSnackbarOpen(true);
+            toast.error(error.response.data.message);
           }
         }
       }
-      // setSnackbarMessage("Error sending mobile number. Please try again.");
+      toast.error("خطایی رخ داده , لطفا دوباره امتحان کنید");
     },
   });
 
@@ -185,7 +160,7 @@ export default function Index() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
+    <>
       <CssBaseline />
       <Grid container component="main" sx={{ height: "100vh" }}>
         <Grid
@@ -343,6 +318,6 @@ export default function Index() {
         onClose={() => setSnackbarOpen(false)}
         message={snackbarMessage}
       />
-    </ThemeProvider>
+    </>
   );
 }
