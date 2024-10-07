@@ -16,3 +16,7 @@ code {
 .Toastify__toast {
   font-family: Samim !important;
 }
+
+span.MuiStepLabel-label  {
+  padding-right: 4px;
+}

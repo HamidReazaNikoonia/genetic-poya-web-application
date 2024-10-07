@@ -56,5 +56,9 @@ export const protectedRoutes = [
 ];
 
 export const publicRoutes = [
-  { path: "/dashboard/*", element: <DashboardRoutes /> },
+  { path: "/dashboard/*", element: <AppLayout />,  children: [
+    {
+        path:"*", element: <DashboardRoutes />
+    }
+  ]},
 ];
