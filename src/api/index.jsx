@@ -56,5 +56,42 @@ export const sendMobileNumber = async (data) => {
  */
 export const sendOtpCode = async (data) => {
   const response = await axios.post(`${BASE_URL}/auth/validate-otp`, data);
+
+  // save token
+
+  if (response.status === 200 && response.data) {
+    // console.log(response.data.tokens.access.token);
+    localStorage.setItem(
+      "GenPoya-Atoken",
+      response.data?.tokens?.access?.token
+    );
+  }
+  return response;
+};
+
+
+
+/**
+ * Consult API
+ * 
+ *
+ */
+
+
+
+
+/**
+ * API function For Create Consult
+ * @param data
+ * 
+ * POST /v1/consult
+ */
+
+export const createConsult = async (data) => {
+  const response = await axios.post(`${BASE_URL}/consult`, data, {
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("GenPoya-Atoken")
+    }
+  });
   return response;
 };

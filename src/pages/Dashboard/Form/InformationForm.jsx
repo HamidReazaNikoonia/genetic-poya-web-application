@@ -24,13 +24,13 @@ function InformationForm() {
   // States
   // const [firstName, setFirstName] = useState("");
   // const [lastName, setLastName] = useState("");
-  const [gender, setgender] = useState("W");
-  const [mariageType, setMariageType] = useState("NON_FAMILY");
-  const [parentMariageType, setParentMariageType] = useState("NON_FAMILY");
+  // const [gender, setgender] = useState("W");
+  // const [mariageType, setMariageType] = useState("NON_FAMILY");
+  // const [parentMariageType, setParentMariageType] = useState("NON_FAMILY");
 
 
-  const firstName = useFormStore((state) => state.firstName)
-  const updateFirstName = useFormStore((state) => state.updateFirstName)
+  // const firstName = useFormStore((state) => state.firstName)
+  // const updateFirstName = useFormStore((state) => state.updateFirstName)
 
   const formData = useFormStore((state) => state.formData)
   const updateformData = useFormStore((state) => state.updateformData)
