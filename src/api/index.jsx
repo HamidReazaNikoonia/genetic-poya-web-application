@@ -95,3 +95,23 @@ export const createConsult = async (data) => {
   });
   return response;
 };
+
+
+
+
+
+/**
+ * API function For Create Reference
+ * @param data
+ * 
+ * POST /v1/consult
+ */
+
+export const createReference = async (data) => {
+  const response = await axios.post(`${BASE_URL}/reference`, data, {
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("GenPoya-Atoken")
+    }
+  });
+  return response;
+};

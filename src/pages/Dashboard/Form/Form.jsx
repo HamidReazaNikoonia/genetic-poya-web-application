@@ -17,7 +17,7 @@ import {
   Stepper,
   Paper,
   Toolbar,
-  AppBar,
+  CircularProgress,
   CssBaseline,
   Box,
   Container,
@@ -29,7 +29,7 @@ import { useMutation } from "@tanstack/react-query";
 // import { styled } from "@mui/material/styles";
 import { useFormStore } from "../../../store/useFormStore";
 
-import { createConsult } from "../../../api";
+import { createConsult, createReference } from "../../../api";
 
 import InformationForm from "./InformationForm";
 import ConsultQ from "./ConsultQ";
@@ -52,6 +52,8 @@ function getStepContent(step) {
 
 const Checkout = ({}) => {
   const [activeStep, setActiveStep] = useState(0);
+  const [loadingForCreateRef, setloadingForCreateRef] = useState(true);
+  const [referenceInfo, setreferenceInfo] = useState(null);
   const formData = useFormStore((state) => state.formData);
   const consultQuestionsFromStore = useFormStore(
     (state) => state.consultQuestions
@@ -59,6 +61,10 @@ const Checkout = ({}) => {
 
   const updateconsultResult = useFormStore(
     (state) => state.updateconsultResult
+  );
+
+  const consultResult = useFormStore(
+    (state) => state.consultResult
   );
 
   /**
@@ -103,6 +109,56 @@ const Checkout = ({}) => {
     },
   });
 
+
+
+  /**
+   * Mutation For Create Reference to the API
+   *
+   * mutation fn => Send Consult DATA , ... to the API
+   * POST v1/reference
+   *
+   *
+   */
+  const createNewReferenceMutation = useMutation({
+    mutationFn: createReference,
+    onSuccess: (data) => {
+      setloadingForCreateRef(false);
+      console.log("API response:", data);
+      if (data.data && data.status === 201) {
+        toast.success("اطلاعات شما به درستی ثبت شد");
+
+        setreferenceInfo(data.data);
+
+        // Navigate user to bank 
+        // https://payment.zarinpal.com/pg/StartPay/
+        setTimeout(() => {
+          window.location.assign(`https://sandbox.zarinpal.com/pg/StartPay/${data.data?.transaction?.factorNumber}`)
+        }, 3000);
+        
+        // store Reference DATA In Store
+        
+
+        // navigate to next step
+        // setAuthSteps(1);
+        // setUserId(data.data?.user?.id);
+      } else {
+        toast.error("خطایی رخ داده , لطفا دوباره امتحان کنید");
+      }
+    },
+    onError: (error) => {
+      setloadingForCreateRef(false);
+      console.error("API error:", error);
+      if (error.response) {
+        if (error.response.data) {
+          if (error.response.data.code && error.response.data.message) {
+            toast.error(error.response.data.message);
+          }
+        }
+      }
+      toast.error("خطایی رخ داده , لطفا دوباره امتحان کنید");
+    },
+  });
+
   const handleNext = () => {
     // Validation for First Stpe {step == 0}
     if (activeStep === 0) {
@@ -126,6 +182,11 @@ const Checkout = ({}) => {
       });
       console.log("kir", consultQuestionsFromStore);
       return false;
+    } else if (activeStep === 2) {
+       // Trigger the mutation
+      createNewReferenceMutation.mutate({
+        consultId: consultResult.consultId
+      })
     }
     setActiveStep(activeStep + 1);
   };
@@ -150,7 +211,6 @@ const Checkout = ({}) => {
     </AppBar> */}
       <Container maxWidth="sm">
         <Box>
-          <h1>{formData.parentMariageType}</h1>
           <Paper elevation={12} sx={{ p: 4 }}>
             <Typography
               sx={{ py: 2 }}
@@ -171,16 +231,21 @@ const Checkout = ({}) => {
             </div>
             <React.Fragment>
               {activeStep === steps.length ? (
-                <React.Fragment>
-                  <Typography variant="h5" gutterBottom>
-                    Thank you for your order.
-                  </Typography>
-                  <Typography variant="subtitle1">
-                    Your order number is #2001539. We have emailed your order
-                    confirmation, and will send you an update when your order
-                    has shipped.
-                  </Typography>
-                </React.Fragment>
+                !loadingForCreateRef ? (
+                  <div dir="rtl">
+                    <Typography variant="h5" gutterBottom>
+                      ممنون از وقتی که گذاشتید
+                    </Typography>
+                    <Typography variant="subtitle1">
+               شما ابتدا به صفحه ی پرداخت منتقل خواهید شد که مبلغ {referenceInfo?.reference.price} تومان را پرداخت کنید و بعد از عملیات پرداخت در صورت موفقیت به سایت بر میگردید برای انتخاب روز و نوع مصاحبه 
+                    </Typography>
+                  </div>
+                ) : (
+                  <div style={{display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '50px 5px'}} align="center">
+                     <CircularProgress size="3rem" />
+                  </div>
+                 
+                )
               ) : (
                 <React.Fragment>
                   {getStepContent(activeStep)}
@@ -195,7 +260,7 @@ const Checkout = ({}) => {
                       disabled={createNewConsultMutation.isPending}
                     >
                       {activeStep === steps.length - 1
-                        ? "Place order"
+                        ? "رزرو مشاوره"
                         : createNewConsultMutation.isPending
                         ? "لطفا صبر کنید ..."
                         : " بعدی"}

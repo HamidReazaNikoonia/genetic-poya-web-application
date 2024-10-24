@@ -10,14 +10,12 @@ import {
   Typography,
   List,
   ListItem,
-  ListItemText,
-  Grid
+  Divider,
+  Grid2 as Grid,
 } from "@mui/material";
-
 
 import { styled } from "@mui/material/styles";
 import { useFormStore } from "../../../store/useFormStore";
-
 
 const products = [
   { name: "Product 1", desc: "A nice thing", price: "$9.99" },
@@ -41,36 +39,37 @@ const payments = [
 ];
 
 function Review() {
-
-  const consultResult = useFormStore(
-    (state) => state.consultResult
-  );
-
+  const consultResult = useFormStore((state) => state.consultResult);
 
   return (
     <React.Fragment>
-      <Typography variant="h6" gutterBottom>
-        Order summary
-      </Typography>
-      
-      <Grid container spacing={16}>
-        <Grid item xs={12} sm={6}>
-          <h1>{consultResult.consultId}</h1>
-        </Grid>
-        <Grid item container direction="column" xs={12} sm={6}>
-          <Typography variant="h6" gutterBottom >
-            Payment details
+      <Grid container direction="column" spacing={1}>
+      <Typography sx={{ pt: 4 }} textAlign="right" variant="h6" gutterBottom>
+          نتیجه اولیه شما
+        </Typography>
+      <Divider  />
+        
+        
+
+        <Grid item sx={{pt:4}} xs={12}>
+          <Typography textAlign="center" variant="h5">
+            {consultResult.consultResult
+              ? "شما به مشاوره نیاز دارید"
+              : "شما نیازی به مشاوره ندارید"}
           </Typography>
-          <Grid container>
-            <h1> {consultResult.consultResult ? 'yesss' : 'noooo'} </h1>
-          </Grid>
         </Grid>
+
+        {consultResult.consultResult && (
+          <Grid item xs={12} sx={{px: 6}}>
+            <Typography textAlign="center" fontSize={16}>
+              شما با کلیک کردن روی دکمه رزرو مشاوره بعد از پرداخت کردن, زمان مشاوره رو انتخاب کنید
+            </Typography>
+          </Grid>
+        )}
       </Grid>
     </React.Fragment>
   );
 }
-
-
 
 // const HtmlTooltip = styled(Review)(({theme}) => ({
 //   listItem: {
@@ -83,6 +82,5 @@ function Review() {
 //     marginTop: theme.spacing.unit * 2,
 //   },
 // }));
-
 
 export default Review;
