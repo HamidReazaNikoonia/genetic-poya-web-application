@@ -115,3 +115,39 @@ export const createReference = async (data) => {
   });
   return response;
 };
+
+
+
+
+
+/**
+ * API function For get Reference By Id
+ * @param data
+ * 
+ */
+
+export const getReferenceById = async ({referenceId}) => {
+  const response = await axios.get(`${BASE_URL}/reference/${referenceId}`, {
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("GenPoya-Atoken")
+    }
+  });
+  return response;
+};
+
+
+
+/**
+ * API function For get All Time Slots
+ * @Query currentTimeSlot => Date
+ * 
+ */
+
+export const getAllAvailableTimeSlots = async ({currentTimeSlot}) => {
+  const response = await axios.get(`${BASE_URL}/admin/time-slot?date=${currentTimeSlot}`, {
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("GenPoya-Atoken")
+    }
+  });
+  return response;
+};

@@ -5,7 +5,7 @@ import { ToastContainer } from "react-toastify";
 import Samim from "./fonts/Samim.woff2";
 import "react-toastify/dist/ReactToastify.css";
 // import logo from './logo.svg';
-// import './App.css';
+import './App.css';
 
 
 const theme = createTheme({
