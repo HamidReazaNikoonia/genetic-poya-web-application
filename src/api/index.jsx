@@ -69,85 +69,98 @@ export const sendOtpCode = async (data) => {
   return response;
 };
 
-
-
 /**
  * Consult API
- * 
+ *
  *
  */
-
-
-
 
 /**
  * API function For Create Consult
  * @param data
- * 
+ *
  * POST /v1/consult
  */
 
 export const createConsult = async (data) => {
   const response = await axios.post(`${BASE_URL}/consult`, data, {
     headers: {
-      Authorization: "Bearer " + localStorage.getItem("GenPoya-Atoken")
-    }
+      Authorization: "Bearer " + localStorage.getItem("GenPoya-Atoken"),
+    },
   });
   return response;
 };
 
-
-
-
-
 /**
  * API function For Create Reference
  * @param data
- * 
+ *
  * POST /v1/consult
  */
 
 export const createReference = async (data) => {
   const response = await axios.post(`${BASE_URL}/reference`, data, {
     headers: {
-      Authorization: "Bearer " + localStorage.getItem("GenPoya-Atoken")
-    }
+      Authorization: "Bearer " + localStorage.getItem("GenPoya-Atoken"),
+    },
   });
   return response;
 };
-
-
-
-
 
 /**
  * API function For get Reference By Id
  * @param data
- * 
+ *
  */
 
-export const getReferenceById = async ({referenceId}) => {
+export const getReferenceById = async ({ referenceId }) => {
   const response = await axios.get(`${BASE_URL}/reference/${referenceId}`, {
     headers: {
-      Authorization: "Bearer " + localStorage.getItem("GenPoya-Atoken")
-    }
+      Authorization: "Bearer " + localStorage.getItem("GenPoya-Atoken"),
+    },
   });
   return response;
 };
 
-
-
 /**
  * API function For get All Time Slots
  * @Query currentTimeSlot => Date
- * 
+ *
  */
 
-export const getAllAvailableTimeSlots = async ({currentTimeSlot}) => {
-  const response = await axios.get(`${BASE_URL}/admin/time-slot?date=${currentTimeSlot}`, {
-    headers: {
-      Authorization: "Bearer " + localStorage.getItem("GenPoya-Atoken")
+export const getAllAvailableTimeSlots = async ({ currentTimeSlot }) => {
+  const response = await axios.get(
+    `${BASE_URL}/admin/time-slot?date=${currentTimeSlot}`,
+    {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("GenPoya-Atoken"),
+      },
     }
-  });
+  );
+  return response;
+};
+
+/**
+ * API function For Implement Session Date and type (Update Reference)
+ * @param {consult_reason, ref_type, time_slot_id, reference_id}
+ *
+ * POST /v1/reference/:reference_id
+ */
+
+export const implementSessionAndUpdateReference = async ({
+  consult_reason,
+  ref_type,
+  time_slot_id,
+  reference_id,
+}) => {
+  const response = await axios.post(
+    `${BASE_URL}/reference/${reference_id}`,
+    { ref_type, time_slot_id, consult_reason },
+    {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("GenPoya-Atoken"),
+      },
+    }
+  );
   return response;
 };

@@ -12,7 +12,11 @@ import {
 } from "@tanstack/react-query";
 
 // API
-import { getReferenceById, getAllAvailableTimeSlots } from "../../api";
+import {
+  getReferenceById,
+  getAllAvailableTimeSlots,
+  implementSessionAndUpdateReference,
+} from "../../api";
 
 // utils
 import createTimeSlot from "../../utils/createTimeSlot";
@@ -45,6 +49,7 @@ const consultReasonFromUser = ["EZDEVAJ", "PISH_AZ_BARDARI"];
 
 export default function ImplementReference() {
   let location = useLocation();
+  const navigate = useNavigate();
   const theme = useTheme();
   const matchesXs = useMediaQuery(theme.breakpoints.only("xs"));
   // const navigate = useNavigate();
@@ -63,10 +68,25 @@ export default function ImplementReference() {
     consult_reason: consultReasonFromUser[0],
   });
 
+  // Get reference From API by Id
   const { data, isSuccess } = useQuery({
     queryKey: ["reference", location.state.referenceId],
     queryFn: () =>
       getReferenceById({ referenceId: location.state.referenceId }),
+  });
+
+  // Update Reference
+  const implementSessionMutaion = useMutation({
+    mutationFn: implementSessionAndUpdateReference,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["reference"] });
+      toast.success("ساعت و روز مصاحبه به همراه دیگر اطلاعات به درستی ثبت شد");
+      navigate("/dashboard/reference-result", {state: {referenceData: JSON.stringify(data.data)}})
+    },
+    onError: (error) => {
+      console.log(error)
+      toast.error("متاسفانه در ثبت اطلاعات مشکلی پیش آمده,  دوباره امتحان کنید");
+    }
   });
 
   // Get Time Slot From API
@@ -129,6 +149,28 @@ export default function ImplementReference() {
     // console.log(timeSlot);
   };
 
+  // Form Submit Function handler
+  const formSubmitHandler = () => {
+    // which TimeSlot Selected
+    const selectedTimeSlotId = timeSlotItem.filter(
+      (item) => item.isSelected === true
+    );
+    console.log(selectedTimeSlotId);
+
+    // check if any time-slot selected or not
+    if (!selectedTimeSlotId[0]) {
+      toast.error("لطفا یک بازه زمانی رو برای ساعت مصاحبه انتخاب کنید");
+      return false;
+    }
+
+    implementSessionMutaion.mutate({
+      consult_reason: formData.consult_reason,
+      ref_type: formData.ref_type,
+      time_slot_id: selectedTimeSlotId[0]?._id,
+      reference_id: location.state.referenceId,
+    });
+  };
+
   const enabledRange = {
     min: momentJalaali().startOf("day"),
   };
@@ -137,7 +179,7 @@ export default function ImplementReference() {
     <>
       <CssBaseline />
       <Container disableGutters={matchesXs}>
-        <Paper elevation={12} sx={{ py: 8, mb: {xs: 0, md: 8} }}>
+        <Paper elevation={12} sx={{ py: 8, mb: { xs: 0, md: 8 } }}>
           <Grid2 container spacing={2}>
             <Grid2 size={12}>
               <Typography
@@ -274,7 +316,10 @@ export default function ImplementReference() {
 
               <Grid2 item xs={{ xs: 12, sm: 6 }}>
                 <div dir="rtl">
-                  <InputLabel sx={{ textAlign: "right", pb: 1 }} id="consult_reason">
+                  <InputLabel
+                    sx={{ textAlign: "right", pb: 1 }}
+                    id="consult_reason"
+                  >
                     دلیل مشاوره
                   </InputLabel>
                   <Select
@@ -309,10 +354,12 @@ export default function ImplementReference() {
               </Typography>
               <Button
                 sx={{ px: 8, py: 1 }}
+                onClick={formSubmitHandler}
                 variant="contained"
+                disabled={implementSessionMutaion.isPending}
                 endIcon={<SendIcon />}
               >
-                ثبت کنید
+                {implementSessionMutaion.isPending ? "صبر کنید ..." : "ثبت کنید"}
               </Button>
             </Grid2>
           </Grid2>
